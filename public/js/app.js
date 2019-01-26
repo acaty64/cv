@@ -46608,9 +46608,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
@@ -46625,7 +46622,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       items: [],
       view: true,
       add: false,
-      save: false,
+      // save: false,
       edit: false,
       niveles: [],
       class_view: 'glyphicon glyphicon-triangle-top',
@@ -46659,6 +46656,109 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
   },
 
   methods: {
+    clear_data: function clear_data() {
+      this.newItem.id = 'new';
+      this.newItem.titulo = '';
+      this.newItem.nivel_id = '';
+      this.newItem.name_file = '';
+      this.newItem.documento = '';
+      this.newItem.yini = '';
+      this.newItem.yfin = '';
+      this.form = new FormData();
+      this.attachment = '';
+    },
+
+    click_save: function () {
+      var _ref = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee() {
+        var promesa;
+        return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(this.consistencia() == 0)) {
+                  _context.next = 7;
+                  break;
+                }
+
+                _context.next = 3;
+                return this.uploadFile();
+
+              case 3:
+                promesa = _context.sent;
+
+                this.save_data();
+                alert('Registro grabado.');
+                return _context.abrupt('return', true);
+
+              case 7:
+                return _context.abrupt('return', false);
+
+              case 8:
+              case 'end':
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function click_save() {
+        return _ref.apply(this, arguments);
+      }
+
+      return click_save;
+    }(),
+    click_add: function () {
+      var _ref2 = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee2() {
+        var response;
+        return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                if (this.add) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                this.add = !this.add;
+                this.class_add = 'glyphicon glyphicon-ok';
+                this.$emit('changeAdd', this.tipo);
+                _context2.next = 10;
+                break;
+
+              case 6:
+                _context2.next = 8;
+                return this.click_save();
+
+              case 8:
+                response = _context2.sent;
+
+                if (response) {
+                  this.add = !this.add;
+                  this.class_add = 'glyphicon glyphicon-plus';
+                }
+
+              case 10:
+              case 'end':
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function click_add() {
+        return _ref2.apply(this, arguments);
+      }
+
+      return click_add;
+    }(),
+    click_view: function click_view() {
+      this.view = !this.view;
+      if (this.view) {
+        this.class_view = 'glyphicon glyphicon-triangle-top';
+      } else {
+        this.class_view = 'glyphicon glyphicon-triangle-bottom';
+      }
+    },
     fieldChange: function fieldChange(e) {
       var selectedFiles = e.target.files;
       if (!selectedFiles.length) {
@@ -46669,11 +46769,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       this.attachment = selectedFiles[0];
       this.newItem.name_file = selectedFiles[0].name;
     },
-
-    // generador: function*() {
-    //   this.uploadFile();
-    //   this.save_data();
-    // },
     uploadFile: function uploadFile() {
       var _this = this;
 
@@ -46697,6 +46792,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
     },
     cancel: function cancel() {
       alert("EN CONSTRUCCION Cancelar Agregar");
+      this.add = !this.add;
+      this.class_add = 'glyphicon glyphicon-plus';
+      this.clear_data();
     },
     getData: function getData() {
       var _this2 = this;
@@ -46709,25 +46807,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       }).catch(function (error) {
         console.log(this.tipo + ' getData: ', error);
       });
-    },
-    click_view: function click_view() {
-      this.view = !this.view;
-      if (this.view) {
-        this.class_view = 'glyphicon glyphicon-triangle-top';
-      } else {
-        this.class_view = 'glyphicon glyphicon-triangle-bottom';
-      }
-    },
-    click_add: function click_add() {
-      if (!this.add) {
-        this.add = !this.add;
-        this.class_add = 'glyphicon glyphicon-ok';
-        this.$emit('changeAdd', this.tipo);
-      } else {
-        this.click_save();
-        this.add = !this.add;
-        this.class_add = 'glyphicon glyphicon-plus';
-      }
     },
     save_data: function save_data() {
       var _this3 = this;
@@ -46747,50 +46826,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
         console.log(_this3.tipo + ' save_data response.data: ', response.data);
         _this3.getData();
         _this3.$emit('clearView');
+        _this3.clear_data();
       }).catch(function (error) {
         console.log(this.tipo + ' save_data: ', error);
       });
     },
 
-    click_save: function () {
-      var _ref = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee() {
-        var promesa;
-        return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                if (!(this.consistencia() > 0)) {
-                  _context.next = 3;
-                  break;
-                }
-
-                console.log(this.tipo + ' consistencia error.');
-                return _context.abrupt('return', false);
-
-              case 3:
-                _context.next = 5;
-                return this.uploadFile();
-
-              case 5:
-                promesa = _context.sent;
-
-                this.save_data();
-                alert('Registro grabado.');
-
-              case 8:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function click_save() {
-        return _ref.apply(this, arguments);
-      }
-
-      return click_save;
-    }(),
     sort_yini: function sort_yini() {
       this.items.sort(function (a, b) {
         return b.yini - a.yini;
@@ -46799,7 +46840,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
     consistencia: function consistencia() {
       var consistencia = [];
       if (!this.newItem.titulo) {
-        consistencia.push("Debe ingresar el Título conseguido.");
+        consistencia.push("Debe ingresar el Grado Académico conseguido.");
       }
       if (!this.newItem.nivel_id) {
         consistencia.push("Debe seleccionar el Grado conseguido en el campo Nivel.");
@@ -47615,7 +47656,7 @@ var render = function() {
       _c("div", { staticClass: "col-md-8" }, [
         _c("div", { staticClass: "panel panel-default" }, [
           _c("div", { staticClass: "panel-heading" }, [
-            _vm._v("Competencias Académicas\n            "),
+            _vm._v("Competencias Académicas\n          "),
             _c(
               "span",
               {
@@ -47721,9 +47762,9 @@ var render = function() {
                     return _c("div", [
                       _c("div", { staticClass: "panel panel-heading" }, [
                         _vm._v(
-                          "Titulo: " +
+                          "Grado Académico: " +
                             _vm._s(item.titulo) +
-                            "\n                      "
+                            "\n                    "
                         ),
                         _c(
                           "button",
@@ -47770,11 +47811,11 @@ var render = function() {
                         ]),
                         _vm._v(" "),
                         _c("div", { staticClass: "panel-body" }, [
-                          _vm._v("Documento: \n                        "),
+                          _vm._v("Documento: \n                      "),
                           _vm._v(" "),
                           item.documento
                             ? _c("span", [
-                                _vm._v("\n                          Ver PDF "),
+                                _vm._v("\n                        Ver PDF "),
                                 _vm._m(0, true)
                               ])
                             : _vm._e()
@@ -47813,7 +47854,7 @@ var render = function() {
                   _c("div", { staticClass: "panel panel-default" }, [
                     _c("div", { staticClass: "panel-body" }, [
                       _vm._v(
-                        "\n                      Titulo:\n                      "
+                        "\n                    Titulo:\n                    "
                       ),
                       _c("input", {
                         directives: [
@@ -47844,7 +47885,7 @@ var render = function() {
                       _vm._v(
                         "Nivel: " +
                           _vm._s(_vm.newItem.nivel_id) +
-                          "\n                        "
+                          "\n                      "
                       ),
                       _c(
                         "select",
@@ -47885,9 +47926,9 @@ var render = function() {
                             { domProps: { value: nivel.nivel_id } },
                             [
                               _vm._v(
-                                "\n                            " +
+                                "\n                          " +
                                   _vm._s(nivel.wnivel) +
-                                  "\n                          "
+                                  "\n                        "
                               )
                             ]
                           )
@@ -47899,7 +47940,7 @@ var render = function() {
                   _vm._v(" "),
                   _c("div", { staticClass: "panel panel-default" }, [
                     _c("div", { staticClass: "panel-body" }, [
-                      _vm._v("\n                      Documento: Subir PDF"),
+                      _vm._v("\n                    Documento: Subir PDF"),
                       _c("br"),
                       _vm._v(" "),
                       _c("div", { staticClass: "col-md-7" }, [
@@ -47915,7 +47956,7 @@ var render = function() {
                   _c("div", { staticClass: "panel panel-default" }, [
                     _c("div", { staticClass: "panel-body" }, [
                       _c("span", { staticClass: "col-md-2" }, [
-                        _vm._v("\n                        Desde: "),
+                        _vm._v("\n                      Desde: "),
                         _c("input", {
                           directives: [
                             {
@@ -47940,7 +47981,7 @@ var render = function() {
                       ]),
                       _vm._v(" "),
                       _c("span", { staticClass: "col-md-2" }, [
-                        _vm._v("\n                       hasta: "),
+                        _vm._v("\n                     hasta: "),
                         _c("input", {
                           directives: [
                             {

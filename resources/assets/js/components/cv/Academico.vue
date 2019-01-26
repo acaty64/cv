@@ -16,7 +16,7 @@
               <span v-show="view && !add">
                 <div class="panel panel-group">              
                   <div v-for="item in items">
-                    <div class="panel panel-heading">Titulo: {{ item.titulo }}
+                    <div class="panel panel-heading">Grado Académico: {{ item.titulo }}
                       <button @click="remove(item)" class="btn-small btn-danger" title="Eliminar detalle" style="float: right"><span class="glyphicon glyphicon-remove"></span></button>
                       <button @click="editing(item)" class="btn-small btn-warning" title="Editar detalle" style="float: right"><span class="glyphicon glyphicon-pencil"></span></button>
                     </div>
@@ -57,9 +57,6 @@
                       <div class="col-md-7">
                         <input id="upload-file" type="file" class="form-control" @change="fieldChange">
                       </div>
-<!--                       <div class="col-md-1">
-                        <button @click="uploadFile" class="btn-small btn-success" style="float: center"><span class="glyphicon glyphicon-upload"></span></button>
-                      </div> -->
                     </div>
                   </div>
                   <div class="panel panel-default">
@@ -94,7 +91,7 @@
         items:[],
         view: true,
         add: false,
-        save: false,
+        // save: false,
         edit: false,
         niveles: [],
         class_view: 'glyphicon glyphicon-triangle-top',
@@ -127,6 +124,51 @@
       };
     },
     methods:{
+      clear_data(){
+        this.newItem.id = 'new';
+        this.newItem.titulo = '';
+        this.newItem.nivel_id = '';
+        this.newItem.name_file = '';
+        this.newItem.documento = '';
+        this.newItem.yini = '';
+        this.newItem.yfin = '';
+        this.form = new FormData;
+        this.attachment = '';
+      },
+      click_save: async function(){
+        if(this.consistencia() == 0){
+          var promesa = await this.uploadFile();
+          this.save_data();
+          alert('Registro grabado.');
+          return true;
+        }
+        // else{
+        //   console.log(this.tipo+' consistencia error.');
+        //   return false;
+        // }
+        return false;
+      },
+      click_add: async function () {
+        if(!this.add){
+          this.add = !this.add;
+          this.class_add = 'glyphicon glyphicon-ok';
+          this.$emit('changeAdd', this.tipo);
+        }else{
+          var response = await this.click_save();
+          if(response){          
+            this.add = !this.add;
+            this.class_add = 'glyphicon glyphicon-plus';
+          }
+        }
+      },
+      click_view: function () {
+        this.view = !this.view;
+        if(this.view){
+          this.class_view = 'glyphicon glyphicon-triangle-top';
+        }else{
+          this.class_view = 'glyphicon glyphicon-triangle-bottom';
+        }
+      },
       fieldChange(e){
         let selectedFiles = e.target.files;
         if(!selectedFiles.length){
@@ -137,10 +179,6 @@
         this.attachment = selectedFiles[0];
         this.newItem.name_file = selectedFiles[0].name;
       },
-      // generador: function*() {
-      //   this.uploadFile();
-      //   this.save_data();
-      // },
       uploadFile() {
         this.form.append('doc',this.attachment);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
@@ -161,6 +199,9 @@
       },
       cancel: function () {
         alert("EN CONSTRUCCION Cancelar Agregar");
+        this.add = !this.add;
+        this.class_add = 'glyphicon glyphicon-plus';
+        this.clear_data();
       },
       getData: function () {        
         var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/load/'+this.user_id;
@@ -171,25 +212,6 @@
         }).catch(function (error) {
             console.log(this.tipo+' getData: ',error);
         });
-      },
-      click_view: function () {
-        this.view = !this.view;
-        if(this.view){
-          this.class_view = 'glyphicon glyphicon-triangle-top';
-        }else{
-          this.class_view = 'glyphicon glyphicon-triangle-bottom';
-        }
-      },
-      click_add: function () {
-        if(!this.add){
-          this.add = !this.add;
-          this.class_add = 'glyphicon glyphicon-ok';
-          this.$emit('changeAdd', this.tipo);
-        }else{
-          this.click_save();
-          this.add = !this.add;
-          this.class_add = 'glyphicon glyphicon-plus';
-        }
       },
       save_data() {
         var request = {
@@ -207,18 +229,10 @@
           console.log(this.tipo+' save_data response.data: ',response.data);
           this.getData();
           this.$emit('clearView');
+          this.clear_data();
         }).catch(function (error) {
             console.log(this.tipo+' save_data: ',error);
         });
-      },
-      click_save: async function(){
-        if(this.consistencia() > 0){
-          console.log(this.tipo+' consistencia error.');
-          return false;
-        }
-        var promesa = await this.uploadFile();
-        this.save_data();
-        alert('Registro grabado.');
       },
       sort_yini: function () {
         this.items.sort(function (a, b) {
@@ -228,7 +242,7 @@
       consistencia(){
         var consistencia = [];
         if(!this.newItem.titulo){
-          consistencia.push("Debe ingresar el Título conseguido.");
+          consistencia.push("Debe ingresar el Grado Académico conseguido.");
         }
         if(!this.newItem.nivel_id){
           consistencia.push("Debe seleccionar el Grado conseguido en el campo Nivel.");
