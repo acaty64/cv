@@ -15,10 +15,10 @@ class AcademicosTableSeeder extends Seeder
         Academico::create([
             'user_id'  => 1,
             'titulo'   => 'Titulo ejemplo',
-            // 'descripcion'   => 'Descripcion ejemplo',
             'yini' => 2000,
             'yfin' => 2015,
             'nivel_id' => 3,
+            'name_file' => 'archivoPDF',
             'documento' => 'fawefafwefaws',
             'verificado' => true
         ]);

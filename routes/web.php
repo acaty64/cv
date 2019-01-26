@@ -28,14 +28,12 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::post('/upload',function(Request $request){
-    $uploadedFiles=$request->pics;
-    foreach ($uploadedFiles as $file){
-    	$path = Storage::put('documentos', $file);
-    }
+    $uploadedFile = $request->doc;
+	$path = Storage::put('documentos', $uploadedFile);
     if(Storage::exists($path)){
-    		$status = true;
+		$status = true;
     }else{
-    		$status = false;
+		$status = false;
     }
     return response(['status'=>$status, 'path'=>$path],200);
 });

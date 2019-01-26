@@ -26,20 +26,24 @@ class AcademicoController extends Controller
     }
     public function save(Request $request)
     {
+// return $request;
         if($request->id == 'new'){
             $item = new Academico;
-            $item->user_id = $request->user_id;
         }else{
             $item = Academico::findOrFail($request->id);
         }
+        $item->user_id = $request->user_id;
         $item->titulo = $request->titulo;
         $item->nivel_id = $request->nivel_id;
+        $item->name_file = $request->name_file;
         $item->documento = $request->documento;
         $item->yini = $request->yini;
         $item->yfin = $request->yfin;
 
         $item->save();
-
+        if(!$item->id){
+            return ['success'=>false];
+        }
         return ['success'=>true];
     }
 

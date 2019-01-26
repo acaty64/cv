@@ -57,9 +57,9 @@
                       <div class="col-md-7">
                         <input id="upload-file" type="file" class="form-control" @change="fieldChange">
                       </div>
-                      <div class="col-md-1">
+<!--                       <div class="col-md-1">
                         <button @click="uploadFile" class="btn-small btn-success" style="float: center"><span class="glyphicon glyphicon-upload"></span></button>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                   <div class="panel panel-default">
@@ -89,12 +89,10 @@
     },
     props: ['user_id'],
     data() {
-      return { 
-        // item:[],
+      return {
         tipo: 'academico',
         items:[],
         view: true,
-        // view_add: false,
         add: false,
         save: false,
         edit: false,
@@ -105,6 +103,7 @@
           id: 'new',
           titulo: '',
           nivel_id: '',
+          name_file: '',
           documento: '',
           yini: '',
           yfin: '',
@@ -113,6 +112,7 @@
           id: '',
           titulo: '',
           nivel_id: '',
+          name_file: '',
           documento: '',
           yini: '',
           yfin: '',
@@ -121,42 +121,38 @@
         protocol: window.location.protocol,
         years: [],
         // Inicio data default uploadFile
-        attachments:[],
+        attachment:'',
         form: new FormData,
         // Fin data default uploadFile
       };
     },
     methods:{
-      // 
       fieldChange(e){
-        let selectedFiles=e.target.files;
-// console.log('fieldChange selectedFiles: ', selectedFiles);
-
+        let selectedFiles = e.target.files;
         if(!selectedFiles.length){
+          this.attachment = '';
+          this.newItem.name_file = '';
           return false;
         }
-        for(let i=0;i<selectedFiles.length;i++){
-          this.attachments.push(selectedFiles[i]);
-        }
-        // console.log('fieldChange this.attachments: ', this.attachments);
+        this.attachment = selectedFiles[0];
+        this.newItem.name_file = selectedFiles[0].name;
       },
-      uploadFile(){
-// console.log('this.attachments: ', this.attachments);
-        for(let i=0; i<this.attachments.length;i++){
-            this.form.append('pics[]',this.attachments[i]);
-        }
-// console.log('this.form: ', this.form);
+      // generador: function*() {
+      //   this.uploadFile();
+      //   this.save_data();
+      // },
+      uploadFile() {
+        this.form.append('doc',this.attachment);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
         document.getElementById('upload-file').value=[];
         axios.post('/upload',this.form,config).then(response=>{
-            //success
-console.log('uploadFile: response', response);
+          let str = response.data.path;
+          let n = str.indexOf('/');
+          this.newItem.documento = str.substring(n+1);
         }).catch(response=>{
-            console.log('uploadFile Error');
-                //error
+          console.log(this.tipo+' uploadFile Error');
         });
       },
-      // 
       editing: function (item) {
         alert("EN CONSTRUCCION Editar item: "+item.id);
       },
@@ -168,14 +164,12 @@ console.log('uploadFile: response', response);
       },
       getData: function () {        
         var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/load/'+this.user_id;
-// console.log('getData: ', url);
         axios.get(url).then(response=>{
-console.log('getData response.data: ',response.data);
             this.items = response.data.datos;
             this.sort_yini();
             this.niveles = response.data.niveles;
         }).catch(function (error) {
-            console.log(error);
+            console.log(this.tipo+' getData: ',error);
         });
       },
       click_view: function () {
@@ -187,17 +181,51 @@ console.log('getData response.data: ',response.data);
         }
       },
       click_add: function () {
-        this.add = !this.add;
-        if(this.add){
+        if(!this.add){
+          this.add = !this.add;
           this.class_add = 'glyphicon glyphicon-ok';
           this.$emit('changeAdd', this.tipo);
         }else{
           this.click_save();
+          this.add = !this.add;
           this.class_add = 'glyphicon glyphicon-plus';
         }
       },
-      click_save: function(){
-        /* Consistencia */
+      save_data() {
+        var request = {
+            'user_id': this.user_id,
+            'id': this.newItem.id,
+            'titulo': this.newItem.titulo,
+            'nivel_id': this.newItem.nivel_id,
+            'name_file' : this.newItem.name_file,
+            'documento': this.newItem.documento,
+            'yini': this.newItem.yini,
+            'yfin': this.newItem.yfin,
+        };
+        var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/save';
+        axios.post(url, request).then(response=>{
+          console.log(this.tipo+' save_data response.data: ',response.data);
+          this.getData();
+          this.$emit('clearView');
+        }).catch(function (error) {
+            console.log(this.tipo+' save_data: ',error);
+        });
+      },
+      click_save: async function(){
+        if(this.consistencia() > 0){
+          console.log(this.tipo+' consistencia error.');
+          return false;
+        }
+        var promesa = await this.uploadFile();
+        this.save_data();
+        alert('Registro grabado.');
+      },
+      sort_yini: function () {
+        this.items.sort(function (a, b) {
+          return (b.yini - a.yini);
+        });
+      },
+      consistencia(){
         var consistencia = [];
         if(!this.newItem.titulo){
           consistencia.push("Debe ingresar el Título conseguido.");
@@ -205,7 +233,7 @@ console.log('getData response.data: ',response.data);
         if(!this.newItem.nivel_id){
           consistencia.push("Debe seleccionar el Grado conseguido en el campo Nivel.");
         }
-        if(!this.newItem.documento){
+        if(!this.newItem.name_file){
           consistencia.push("Debe subir el Documento que certifique el grado conseguido en formato PDF.");
         }
         if(!this.newItem.yini){
@@ -217,31 +245,8 @@ console.log('getData response.data: ',response.data);
         for (var i = 0; i<consistencia.length; i++) {
           alert(consistencia[i]);
         }
-        if(consistencia.length == 0){
-          var request = {
-              'user_id': this.user_id,
-              'titulo': this.newItem.titulo,
-              'nivel_id': this.newItem.nivel_id,
-              'documento': this.newItem.documento,
-              'yini': this.newItem.yini,
-              'yfin': this.newItem.yfin,
-          };
-          var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/save';
-          axios.post(url, request).then(response=>{
-console.log('save response.data: ',response.data);
-            alert('Registro grabado.');
-            this.getData();
-            this.$emit('clearView');
-          }).catch(function (error) {
-              console.log(error);
-          });
-        }
+        return consistencia.length;
       },
-      sort_yini: function () {
-        this.items.sort(function (a, b) {
-          return (b.yini - a.yini);
-        });
-      }
     },
   }
 </script>

@@ -21,6 +21,7 @@ class CreateAcademicosTable extends Migration
             $table->integer('nivel_id');
             $table->integer('yini');
             $table->integer('yfin')->nullable();
+            $table->string('name_file')->nullable();
             $table->string('documento')->nullable();
             $table->boolean('verificado')->default(false);
             $table->timestamps();
