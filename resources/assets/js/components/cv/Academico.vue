@@ -135,27 +135,25 @@
         this.form = new FormData;
         this.attachment = '';
       },
-      click_save: async function(){
+      async click_save (){
         if(this.consistencia() == 0){
-          var promesa = await this.uploadFile();
+// console.log('click_save 0: ', this.newItem.documento);
+          await this.uploadFile();
+// console.log('click_save 1: ', this.newItem.documento);
           this.save_data();
-          alert('Registro grabado.');
           return true;
         }
-        // else{
-        //   console.log(this.tipo+' consistencia error.');
-        //   return false;
-        // }
         return false;
       },
-      click_add: async function () {
+      async click_add () {
         if(!this.add){
           this.add = !this.add;
           this.class_add = 'glyphicon glyphicon-ok';
           this.$emit('changeAdd', this.tipo);
         }else{
           var response = await this.click_save();
-          if(response){          
+          if(response){
+            alert('Registro grabado.');          
             this.add = !this.add;
             this.class_add = 'glyphicon glyphicon-plus';
           }
@@ -179,14 +177,15 @@
         this.attachment = selectedFiles[0];
         this.newItem.name_file = selectedFiles[0].name;
       },
-      uploadFile() {
+      async uploadFile() {
         this.form.append('doc',this.attachment);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
         document.getElementById('upload-file').value=[];
-        axios.post('/upload',this.form,config).then(response=>{
+        await axios.post('/upload',this.form,config).then(response=>{
           let str = response.data.path;
           let n = str.indexOf('/');
           this.newItem.documento = str.substring(n+1);
+// console.log('uploadFile: ', this.newItem.documento);
         }).catch(response=>{
           console.log(this.tipo+' uploadFile Error');
         });
@@ -213,7 +212,7 @@
             console.log(this.tipo+' getData: ',error);
         });
       },
-      save_data() {
+      async save_data() {
         var request = {
             'user_id': this.user_id,
             'id': this.newItem.id,
@@ -225,8 +224,8 @@
             'yfin': this.newItem.yfin,
         };
         var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/save';
-        axios.post(url, request).then(response=>{
-          console.log(this.tipo+' save_data response.data: ',response.data);
+        await axios.post(url, request).then(response=>{
+          // console.log(this.tipo+' save_data response.data: ',response.data);
           this.getData();
           this.$emit('clearView');
           this.clear_data();

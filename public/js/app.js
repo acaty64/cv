@@ -46667,10 +46667,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       this.form = new FormData();
       this.attachment = '';
     },
-
     click_save: function () {
       var _ref = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee() {
-        var promesa;
         return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -46680,14 +46678,13 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                   break;
                 }
 
-                _context.next = 3;
+                console.log('click_save 0: ', this.newItem.documento);
+                _context.next = 4;
                 return this.uploadFile();
 
-              case 3:
-                promesa = _context.sent;
-
+              case 4:
+                console.log('click_save 1: ', this.newItem.documento);
                 this.save_data();
-                alert('Registro grabado.');
                 return _context.abrupt('return', true);
 
               case 7:
@@ -46733,6 +46730,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 response = _context2.sent;
 
                 if (response) {
+                  alert('Registro grabado.');
                   this.add = !this.add;
                   this.class_add = 'glyphicon glyphicon-plus';
                 }
@@ -46751,6 +46749,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
       return click_add;
     }(),
+
     click_view: function click_view() {
       this.view = !this.view;
       if (this.view) {
@@ -46769,20 +46768,43 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       this.attachment = selectedFiles[0];
       this.newItem.name_file = selectedFiles[0].name;
     },
-    uploadFile: function uploadFile() {
-      var _this = this;
+    uploadFile: function () {
+      var _ref3 = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee3() {
+        var _this = this;
 
-      this.form.append('doc', this.attachment);
-      var config = { headers: { 'Content-Type': 'multipart/form-data' } };
-      document.getElementById('upload-file').value = [];
-      axios.post('/upload', this.form, config).then(function (response) {
-        var str = response.data.path;
-        var n = str.indexOf('/');
-        _this.newItem.documento = str.substring(n + 1);
-      }).catch(function (response) {
-        console.log(_this.tipo + ' uploadFile Error');
-      });
-    },
+        var config;
+        return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                this.form.append('doc', this.attachment);
+                config = { headers: { 'Content-Type': 'multipart/form-data' } };
+
+                document.getElementById('upload-file').value = [];
+                _context3.next = 5;
+                return axios.post('/upload', this.form, config).then(function (response) {
+                  var str = response.data.path;
+                  var n = str.indexOf('/');
+                  _this.newItem.documento = str.substring(n + 1);
+                  console.log('uploadFile: ', _this.newItem.documento);
+                }).catch(function (response) {
+                  console.log(_this.tipo + ' uploadFile Error');
+                });
+
+              case 5:
+              case 'end':
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+
+      function uploadFile() {
+        return _ref3.apply(this, arguments);
+      }
+
+      return uploadFile;
+    }(),
 
     editing: function editing(item) {
       alert("EN CONSTRUCCION Editar item: " + item.id);
@@ -46808,29 +46830,50 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
         console.log(this.tipo + ' getData: ', error);
       });
     },
-    save_data: function save_data() {
-      var _this3 = this;
+    save_data: function () {
+      var _ref4 = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee4() {
+        var _this3 = this;
 
-      var request = {
-        'user_id': this.user_id,
-        'id': this.newItem.id,
-        'titulo': this.newItem.titulo,
-        'nivel_id': this.newItem.nivel_id,
-        'name_file': this.newItem.name_file,
-        'documento': this.newItem.documento,
-        'yini': this.newItem.yini,
-        'yfin': this.newItem.yfin
-      };
-      var url = this.protocol + '//' + this.URLdomain + '/api/cv/academico/save';
-      axios.post(url, request).then(function (response) {
-        console.log(_this3.tipo + ' save_data response.data: ', response.data);
-        _this3.getData();
-        _this3.$emit('clearView');
-        _this3.clear_data();
-      }).catch(function (error) {
-        console.log(this.tipo + ' save_data: ', error);
-      });
-    },
+        var request, url;
+        return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                request = {
+                  'user_id': this.user_id,
+                  'id': this.newItem.id,
+                  'titulo': this.newItem.titulo,
+                  'nivel_id': this.newItem.nivel_id,
+                  'name_file': this.newItem.name_file,
+                  'documento': this.newItem.documento,
+                  'yini': this.newItem.yini,
+                  'yfin': this.newItem.yfin
+                };
+                url = this.protocol + '//' + this.URLdomain + '/api/cv/academico/save';
+                _context4.next = 4;
+                return axios.post(url, request).then(function (response) {
+                  console.log(_this3.tipo + ' save_data response.data: ', response.data);
+                  _this3.getData();
+                  _this3.$emit('clearView');
+                  _this3.clear_data();
+                }).catch(function (error) {
+                  console.log(this.tipo + ' save_data: ', error);
+                });
+
+              case 4:
+              case 'end':
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function save_data() {
+        return _ref4.apply(this, arguments);
+      }
+
+      return save_data;
+    }(),
 
     sort_yini: function sort_yini() {
       this.items.sort(function (a, b) {
