@@ -46607,7 +46607,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
@@ -46780,7 +46779,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       }
     },
     fieldChange: function fieldChange(e) {
-      console.log('e.target.files: ', e.target.files);
+      // console.log('e.target.files: ', e.target.files);
       var selectedFiles = e.target.files;
       if (!selectedFiles.length) {
         this.attachment = '';
@@ -46805,7 +46804,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
                 document.getElementById('upload-file').value = [];
                 _context3.next = 6;
-                return axios.post('/api/upload', this.form, config).then(function (response) {
+                return axios.post('/api/' + this.tipo + '/upload', this.form, config).then(function (response) {
                   var str = response.data.path;
                   var n = str.indexOf(_this.tipo + '/') + _this.tipo.length;
                   _this.newItem.documento = str.substring(n + 1);
@@ -46830,10 +46829,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
     }(),
 
     remove: function remove(item) {
+      var _this2 = this;
+
       alert("EN CONSTRUCCION Eliminar item: " + item.id);
+      var request = {
+        'data': item
+      };
+      var url = this.protocol + '//' + this.URLdomain + '/api/cv/academico/destroy';
+      axios.post(url, request).then(function (response) {
+        console.log('remove: ', response.data);
+        _this2.getData();
+      }).catch(function (response) {
+        console.log(_this2.tipo + ' remove Error');
+      });
     },
     cancel: function cancel() {
-      alert("EN CONSTRUCCION Cancelar Agregar");
+      // alert("EN CONSTRUCCION Cancelar Agregar");
       this.add = !this.add;
       this.edit = false;
       this.class_add = 'glyphicon glyphicon-plus';
@@ -46841,20 +46852,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       this.$emit('clearView');
     },
     getData: function getData() {
-      var _this2 = this;
+      var _this3 = this;
 
       var url = this.protocol + '//' + this.URLdomain + '/api/cv/academico/load/' + this.user_id;
       axios.get(url).then(function (response) {
-        _this2.items = response.data.datos;
-        _this2.sort_yini();
-        _this2.niveles = response.data.niveles;
+        _this3.items = response.data.datos;
+        _this3.sort_yini();
+        _this3.niveles = response.data.niveles;
       }).catch(function (error) {
         console.log(this.tipo + ' getData: ', error);
       });
     },
     save_data: function () {
       var _ref4 = _asyncToGenerator( /*#__PURE__*/__WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.mark(function _callee4() {
-        var _this3 = this;
+        var _this4 = this;
 
         var request, url;
         return __WEBPACK_IMPORTED_MODULE_0_babel_runtime_regenerator___default.a.wrap(function _callee4$(_context4) {
@@ -46875,9 +46886,9 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 _context4.next = 4;
                 return axios.post(url, request).then(function (response) {
                   // console.log(this.tipo+' save_data response.data: ',response.data);
-                  _this3.getData();
-                  _this3.$emit('clearView');
-                  _this3.clear_data();
+                  _this4.getData();
+                  _this4.$emit('clearView');
+                  _this4.clear_data();
                 }).catch(function (error) {
                   console.log(this.tipo + ' save_data: ', error);
                 });

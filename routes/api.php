@@ -23,6 +23,11 @@ Route::post('/cv/academico/save', [
 	'uses'	=> 'Api\cv\AcademicoController@save'
 ]);
 
+Route::post('/cv/academico/destroy', [
+	'as'	=> 'academico.destroy',
+	'uses'	=> 'Api\cv\AcademicoController@destroy'
+]);
+
 Route::post('/upload',function(Request $request){
     $uploadedFile = $request->doc;
 	$path = Storage::put('public/'.$request->tipo, $uploadedFile);

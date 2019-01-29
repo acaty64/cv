@@ -49,7 +49,11 @@ class AcademicoController extends Controller
 
     public function destroy(Request $request)
     {
-        return 'Controller.destroy()';
+        $item = $request->all();
+        $id = $item['data']['id'];
+        $academico = Academico::findOrFail($id);
+        $academico->delete();
+        return ['success'=>true];
     }
 
 }

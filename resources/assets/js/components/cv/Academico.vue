@@ -191,7 +191,7 @@
         }
       },
       fieldChange(e){
-console.log('e.target.files: ', e.target.files);
+// console.log('e.target.files: ', e.target.files);
         let selectedFiles = e.target.files;
         if(!selectedFiles.length){
           this.attachment = '';
@@ -206,7 +206,7 @@ console.log('e.target.files: ', e.target.files);
         this.form.append('tipo',this.tipo);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
         document.getElementById('upload-file').value=[];
-        await axios.post('/api/upload',this.form,config).then(response=>{
+        await axios.post('/api/'+this.tipo+'/upload',this.form,config).then(response=>{
           let str = response.data.path;
           let n = str.indexOf(this.tipo+'/') + this.tipo.length;
           this.newItem.documento = str.substring(n+1);
@@ -217,6 +217,16 @@ console.log('e.target.files: ', e.target.files);
       },
       remove: function (item) {
         alert("EN CONSTRUCCION Eliminar item: "+item.id);
+        let request = {
+                    'data': item,
+                  };
+        var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/destroy';     
+        axios.post(url, request).then(response=>{
+console.log('remove: ', response.data);
+          this.getData();
+        }).catch(response=>{
+          console.log(this.tipo+' remove Error');
+        });
       },
       cancel: function () {
         // alert("EN CONSTRUCCION Cancelar Agregar");
