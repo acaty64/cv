@@ -47,4 +47,9 @@ class AcademicoController extends Controller
         return ['success'=>true];
     }
 
+    public function destroy(Request $request)
+    {
+        return 'Controller.destroy()';
+    }
+
 }

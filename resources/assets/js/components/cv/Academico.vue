@@ -7,13 +7,13 @@
             <span v-show="add">
               <button class="btn-small btn-danger" title="Cancelar" style="float: right"><span @click='cancel()' class="glyphicon glyphicon-remove"></span></button>
             </span>
-            <span v-show="!add">
+            <span v-show="!add && !edit">
               <button class="btn-small" title="Ver/Ocultar detalle" style="float: right" @click='click_view()'><span :class="class_view"></span></button>
             </span>
             <button class="btn-small" title="Agregar detalle" style="float: right"><span @click='click_add()' :class="class_add"></span></button>
           </div>
           <div class="panel-body">
-              <span v-show="view && !add">
+              <span v-show="view && !add && !edit">
                 <div class="panel panel-group">              
                   <div v-for="item in items">
                     <div class="panel panel-heading">Grado Académico: {{ item.titulo }}
@@ -22,10 +22,9 @@
                     </div>
                     <div class="panel panel-default">
                       <div class="panel-body">Nivel: {{ item.wnivel }}</div>
-                      <div class="panel-body">Documento: 
-                        <!-- {{ item.documento }} -->
+                      <div class="panel-body">Documento:
                         <span v-if="item.documento">
-                          Ver PDF <button class="btn-small btn-success"><span class="glyphicon glyphicon-eye-open"></span></button>
+                           <a href="#" @click="openPDF(item.documento)" class="btn-small btn-success">Ver archivo: {{ item.name_file }}</a>
                         </span>
                       </div>
                       <div class="panel-body">Desde: {{ item.yini }} hasta: {{ item.yfin }}</div>
@@ -33,7 +32,7 @@
                   </div>
                 </div>
               </span>
-              <span v-show="add">
+              <span v-show="add || edit">
                 <div class="panel panel-group">              
                   <div class="panel panel-default">
                     <div class="panel-body">
@@ -44,7 +43,6 @@
                   <div class="panel panel-default">
                     <div class="panel-body">Nivel: {{ newItem.nivel_id }}
                         <select dusk="sel_nivel" id="sel_nivel" v-model="newItem.nivel_id" class="form-control">
-                           <!-- v-on:change="registerNivel(newItem)" -->
                           <option v-for="nivel in niveles" :value="nivel.nivel_id">
                             {{ nivel.wnivel }}
                           </option>
@@ -89,12 +87,12 @@
       return {
         tipo: 'academico',
         items:[],
-        view: true,
+        view: false,
         add: false,
         // save: false,
         edit: false,
         niveles: [],
-        class_view: 'glyphicon glyphicon-triangle-top',
+        class_view: 'glyphicon glyphicon-triangle-bottom',
         class_add: 'glyphicon glyphicon-plus',
         newItem:{
           id: 'new',
@@ -124,7 +122,31 @@
       };
     },
     methods:{
+      openPDF(documento){
+        var archivo = "/storage/"+this.tipo+"/"+documento;
+        window.open(archivo);
+        return false;
+      },
+      editing: function (item) {
+        this.edit = true;
+        alert("EN CONSTRUCCION Editar item: "+item.id);
+        this.clear_data();
+        this.newItem.id = item.id;
+        this.newItem.titulo = item.titulo;
+        this.newItem.nivel_id = item.nivel_id;
+        this.newItem.name_file = item.name_file;
+        this.newItem.documento = item.documento;
+        this.newItem.yini = item.yini;
+        this.newItem.yfin = item.yfin;
+        this.form = new FormData;
+        this.attachment = item.attachment;
+        this.click_add();        
+      },
       clear_data(){
+        this.view = false,
+        this.add = false,
+        this.edit = false,
+        
         this.newItem.id = 'new';
         this.newItem.titulo = '';
         this.newItem.nivel_id = '';
@@ -155,6 +177,7 @@
           if(response){
             alert('Registro grabado.');          
             this.add = !this.add;
+            this.edit = false;
             this.class_add = 'glyphicon glyphicon-plus';
           }
         }
@@ -168,6 +191,7 @@
         }
       },
       fieldChange(e){
+console.log('e.target.files: ', e.target.files);
         let selectedFiles = e.target.files;
         if(!selectedFiles.length){
           this.attachment = '';
@@ -179,28 +203,28 @@
       },
       async uploadFile() {
         this.form.append('doc',this.attachment);
+        this.form.append('tipo',this.tipo);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
         document.getElementById('upload-file').value=[];
-        await axios.post('/upload',this.form,config).then(response=>{
+        await axios.post('/api/upload',this.form,config).then(response=>{
           let str = response.data.path;
-          let n = str.indexOf('/');
+          let n = str.indexOf(this.tipo+'/') + this.tipo.length;
           this.newItem.documento = str.substring(n+1);
 // console.log('uploadFile: ', this.newItem.documento);
         }).catch(response=>{
           console.log(this.tipo+' uploadFile Error');
         });
       },
-      editing: function (item) {
-        alert("EN CONSTRUCCION Editar item: "+item.id);
-      },
       remove: function (item) {
         alert("EN CONSTRUCCION Eliminar item: "+item.id);
       },
       cancel: function () {
-        alert("EN CONSTRUCCION Cancelar Agregar");
+        // alert("EN CONSTRUCCION Cancelar Agregar");
         this.add = !this.add;
+        this.edit = false;
         this.class_add = 'glyphicon glyphicon-plus';
         this.clear_data();
+        this.$emit('clearView');
       },
       getData: function () {        
         var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/load/'+this.user_id;

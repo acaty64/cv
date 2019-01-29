@@ -46075,6 +46075,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       };
     },
     clearView: function clearView() {
+      console.log('clearView');
       for (var i in this.view) {
         this.view[i] = true;
       }
@@ -46607,7 +46608,6 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 //
 //
 //
-//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
@@ -46620,12 +46620,12 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
     return {
       tipo: 'academico',
       items: [],
-      view: true,
+      view: false,
       add: false,
       // save: false,
       edit: false,
       niveles: [],
-      class_view: 'glyphicon glyphicon-triangle-top',
+      class_view: 'glyphicon glyphicon-triangle-bottom',
       class_add: 'glyphicon glyphicon-plus',
       newItem: {
         id: 'new',
@@ -46656,8 +46656,29 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
   },
 
   methods: {
+    openPDF: function openPDF(documento) {
+      var archivo = "/storage/" + this.tipo + "/" + documento;
+      window.open(archivo);
+      return false;
+    },
+
+    editing: function editing(item) {
+      this.edit = true;
+      alert("EN CONSTRUCCION Editar item: " + item.id);
+      this.clear_data();
+      this.newItem.id = item.id;
+      this.newItem.titulo = item.titulo;
+      this.newItem.nivel_id = item.nivel_id;
+      this.newItem.name_file = item.name_file;
+      this.newItem.documento = item.documento;
+      this.newItem.yini = item.yini;
+      this.newItem.yfin = item.yfin;
+      this.form = new FormData();
+      this.attachment = item.attachment;
+      this.click_add();
+    },
     clear_data: function clear_data() {
-      this.newItem.id = 'new';
+      this.view = false, this.add = false, this.edit = false, this.newItem.id = 'new';
       this.newItem.titulo = '';
       this.newItem.nivel_id = '';
       this.newItem.name_file = '';
@@ -46674,23 +46695,22 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             switch (_context.prev = _context.next) {
               case 0:
                 if (!(this.consistencia() == 0)) {
-                  _context.next = 7;
+                  _context.next = 5;
                   break;
                 }
 
-                console.log('click_save 0: ', this.newItem.documento);
-                _context.next = 4;
+                _context.next = 3;
                 return this.uploadFile();
 
-              case 4:
-                console.log('click_save 1: ', this.newItem.documento);
+              case 3:
+                // console.log('click_save 1: ', this.newItem.documento);
                 this.save_data();
                 return _context.abrupt('return', true);
 
-              case 7:
+              case 5:
                 return _context.abrupt('return', false);
 
-              case 8:
+              case 6:
               case 'end':
                 return _context.stop();
             }
@@ -46732,6 +46752,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 if (response) {
                   alert('Registro grabado.');
                   this.add = !this.add;
+                  this.edit = false;
                   this.class_add = 'glyphicon glyphicon-plus';
                 }
 
@@ -46759,6 +46780,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       }
     },
     fieldChange: function fieldChange(e) {
+      console.log('e.target.files: ', e.target.files);
       var selectedFiles = e.target.files;
       if (!selectedFiles.length) {
         this.attachment = '';
@@ -46778,20 +46800,21 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
             switch (_context3.prev = _context3.next) {
               case 0:
                 this.form.append('doc', this.attachment);
+                this.form.append('tipo', this.tipo);
                 config = { headers: { 'Content-Type': 'multipart/form-data' } };
 
                 document.getElementById('upload-file').value = [];
-                _context3.next = 5;
-                return axios.post('/upload', this.form, config).then(function (response) {
+                _context3.next = 6;
+                return axios.post('/api/upload', this.form, config).then(function (response) {
                   var str = response.data.path;
-                  var n = str.indexOf('/');
+                  var n = str.indexOf(_this.tipo + '/') + _this.tipo.length;
                   _this.newItem.documento = str.substring(n + 1);
-                  console.log('uploadFile: ', _this.newItem.documento);
+                  // console.log('uploadFile: ', this.newItem.documento);
                 }).catch(function (response) {
                   console.log(_this.tipo + ' uploadFile Error');
                 });
 
-              case 5:
+              case 6:
               case 'end':
                 return _context3.stop();
             }
@@ -46806,17 +46829,16 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
       return uploadFile;
     }(),
 
-    editing: function editing(item) {
-      alert("EN CONSTRUCCION Editar item: " + item.id);
-    },
     remove: function remove(item) {
       alert("EN CONSTRUCCION Eliminar item: " + item.id);
     },
     cancel: function cancel() {
       alert("EN CONSTRUCCION Cancelar Agregar");
       this.add = !this.add;
+      this.edit = false;
       this.class_add = 'glyphicon glyphicon-plus';
       this.clear_data();
+      this.$emit('clearView');
     },
     getData: function getData() {
       var _this2 = this;
@@ -46852,7 +46874,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
                 url = this.protocol + '//' + this.URLdomain + '/api/cv/academico/save';
                 _context4.next = 4;
                 return axios.post(url, request).then(function (response) {
-                  console.log(_this3.tipo + ' save_data response.data: ', response.data);
+                  // console.log(this.tipo+' save_data response.data: ',response.data);
                   _this3.getData();
                   _this3.$emit('clearView');
                   _this3.clear_data();
@@ -47741,8 +47763,8 @@ var render = function() {
                   {
                     name: "show",
                     rawName: "v-show",
-                    value: !_vm.add,
-                    expression: "!add"
+                    value: !_vm.add && !_vm.edit,
+                    expression: "!add && !edit"
                   }
                 ]
               },
@@ -47792,8 +47814,8 @@ var render = function() {
                   {
                     name: "show",
                     rawName: "v-show",
-                    value: _vm.view && !_vm.add,
-                    expression: "view && !add"
+                    value: _vm.view && !_vm.add && !_vm.edit,
+                    expression: "view && !add && !edit"
                   }
                 ]
               },
@@ -47854,12 +47876,26 @@ var render = function() {
                         ]),
                         _vm._v(" "),
                         _c("div", { staticClass: "panel-body" }, [
-                          _vm._v("Documento: \n                      "),
-                          _vm._v(" "),
+                          _vm._v("Documento:\n                      "),
                           item.documento
                             ? _c("span", [
-                                _vm._v("\n                        Ver PDF "),
-                                _vm._m(0, true)
+                                _c(
+                                  "a",
+                                  {
+                                    staticClass: "btn-small btn-success",
+                                    attrs: { href: "#" },
+                                    on: {
+                                      click: function($event) {
+                                        _vm.openPDF(item.documento)
+                                      }
+                                    }
+                                  },
+                                  [
+                                    _vm._v(
+                                      "Ver archivo: " + _vm._s(item.name_file)
+                                    )
+                                  ]
+                                )
                               ])
                             : _vm._e()
                         ]),
@@ -47887,8 +47923,8 @@ var render = function() {
                   {
                     name: "show",
                     rawName: "v-show",
-                    value: _vm.add,
-                    expression: "add"
+                    value: _vm.add || _vm.edit,
+                    expression: "add || edit"
                   }
                 ]
               },
@@ -48058,16 +48094,7 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("button", { staticClass: "btn-small btn-success" }, [
-      _c("span", { staticClass: "glyphicon glyphicon-eye-open" })
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {

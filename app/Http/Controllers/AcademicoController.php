@@ -4,9 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Academico;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class AcademicoController extends Controller
 {
+//     public function view($documento)
+//     {
+// // dd(asset('storage/app/documentos/'.$documento));
+//         $file = storage_path('app/public/documentos/'.$documento);
+//         if (File::isFile($file))
+//         {
+//             $archivo = 'storage/documentos/'.$documento;
+//             return view('cv.view')
+//                 ->with('documento', $archivo)
+//                 ->with('modulo', 'Académico');
+//         }else{
+//             dd('No existe'.$file);
+//         }
+//     }
     /**
      * Display a listing of the resource.
      *

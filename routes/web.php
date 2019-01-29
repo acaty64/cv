@@ -27,13 +27,8 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Route::post('/upload',function(Request $request){
-    $uploadedFile = $request->doc;
-	$path = Storage::put('documentos', $uploadedFile);
-    if(Storage::exists($path)){
-		$status = true;
-    }else{
-		$status = false;
-    }
-    return response(['status'=>$status, 'path'=>$path],200);
-});
+
+// Route::get('/view/{documento}', [
+// 	'as'	=> 'academico.view',
+// 	'uses'	=> 'AcademicoController@view'	
+// ]);

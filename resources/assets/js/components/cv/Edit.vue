@@ -59,6 +59,7 @@ Edit: {{ user_id }}
         };
       },
       clearView: function () {
+console.log('clearView');
         for (var i in this.view) {
           this.view[i] = true;
         }

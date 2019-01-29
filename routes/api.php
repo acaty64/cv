@@ -23,6 +23,19 @@ Route::post('/cv/academico/save', [
 	'uses'	=> 'Api\cv\AcademicoController@save'
 ]);
 
+Route::post('/upload',function(Request $request){
+    $uploadedFile = $request->doc;
+	$path = Storage::put('public/'.$request->tipo, $uploadedFile);
+    if(Storage::exists($path)){
+		$status = true;
+    }else{
+		$status = false;
+    }
+    return response(['status'=>$status, 'path'=>$path],200);
+});
+
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
