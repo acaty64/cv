@@ -3,14 +3,14 @@
     <div class="row">
       <div class="col-md-8">
         <div class="panel panel-default">
-          <div class="panel-heading">Competencias Académicas
-            <span v-show="add">
+          <div class="panel-heading">Competencias Académicas ({{ items.length }})
+            <span v-show="add || edit">
               <button class="btn-small btn-danger" title="Cancelar" style="float: right"><span @click='cancel()' class="glyphicon glyphicon-remove"></span></button>
             </span>
             <span v-show="!add && !edit">
-              <button class="btn-small" title="Ver/Ocultar detalle" style="float: right" @click='click_view()'><span :class="class_view"></span></button>
+              <button class="btn-small" title="Ver/Ocultar detalle" style="float: right" @click='click_view()'><span :class="class_b2"></span></button>
             </span>
-            <button class="btn-small" title="Agregar detalle" style="float: right"><span @click='click_add()' :class="class_add"></span></button>
+            <button class="btn-small" title="Agregar detalle" style="float: right"><span @click='click_add()' :class="class_b1"></span></button>
           </div>
           <div class="panel-body">
               <span v-show="view && !add && !edit">
@@ -27,7 +27,14 @@
                            <a href="#" @click="openPDF(item.documento)" class="btn-small btn-success">Ver archivo: {{ item.name_file }}</a>
                         </span>
                       </div>
-                      <div class="panel-body">Desde: {{ item.yini }} hasta: {{ item.yfin }}</div>
+                      <div class="panel-body">Desde: {{ item.yini }} 
+                        <span v-if="item.yfin">
+                          hasta: {{ item.yfin }}
+                        </span>
+                        <span v-else>
+                          hasta: Actualidad
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -50,12 +57,20 @@
                     </div>
                   </div>
                   <div class="panel panel-default">
-                    <div class="panel-body">
-                      Documento: Subir PDF<br> 
-                      <div class="col-md-7">
-                        <input id="upload-file" type="file" class="form-control" @change="fieldChange">
+                    <span v-show="add">                      
+                      <div class="panel-body">
+                        Documento: Subir PDF<br> 
+                        <div class="col-md-7">
+                          <input type="hidden" name="MAX_FILE_SIZE" value="30000">
+                          <input id="upload-file" type="file" class="form-control" @change="fieldChange">
+                        </div>
                       </div>
-                    </div>
+                    </span>
+                    <span v-show="edit">                      
+                      <div class="panel-body">
+                        Documento: {{ newItem.name_file }}<br> 
+                      </div>
+                    </span>
                   </div>
                   <div class="panel panel-default">
                     <div class="panel-body">
@@ -81,6 +96,7 @@
     mounted() {
       console.log('Academico mounted.');
       this.getData();
+      this.toastr_init();
     },
     props: ['user_id'],
     data() {
@@ -92,8 +108,8 @@
         // save: false,
         edit: false,
         niveles: [],
-        class_view: 'glyphicon glyphicon-triangle-bottom',
-        class_add: 'glyphicon glyphicon-plus',
+        // class_view: 'glyphicon glyphicon-triangle-bottom',
+        // class_add: 'glyphicon glyphicon-plus',
         newItem:{
           id: 'new',
           titulo: '',
@@ -102,6 +118,7 @@
           documento: '',
           yini: '',
           yfin: '',
+          file: [],
         },
         editItem:{
           id: '',
@@ -121,16 +138,53 @@
         // Fin data default uploadFile
       };
     },
+    computed:{
+      class_b1: function () {
+        switch(this.add) {
+          case true:
+            switch(this.edit) {
+              case true:
+                return 'error';
+                break;
+              case false:
+                return 'glyphicon glyphicon-ok';
+                break;
+            }
+            break;
+          case false:
+            switch(this.edit) {
+              case true:
+                return 'glyphicon glyphicon-ok';
+                break;
+              case false:
+                return 'glyphicon glyphicon-plus';
+                break;
+            };       
+            break;
+        };
+      },
+      class_b2: function () {
+        if(this.view){
+          return 'glyphicon glyphicon-triangle-top';
+        }else{
+          return 'glyphicon glyphicon-triangle-bottom';
+        }
+      },
+    },
     methods:{
+      toastr_init(){
+        toastr.closeButton = false;
+        toastr.debug = false;
+        toastr.showDuration = 100;
+      },
       openPDF(documento){
         var archivo = "/storage/"+this.tipo+"/"+documento;
         window.open(archivo);
         return false;
       },
       editing: function (item) {
-        this.edit = true;
-        alert("EN CONSTRUCCION Editar item: "+item.id);
         this.clear_data();
+        this.edit = true;
         this.newItem.id = item.id;
         this.newItem.titulo = item.titulo;
         this.newItem.nivel_id = item.nivel_id;
@@ -138,9 +192,7 @@
         this.newItem.documento = item.documento;
         this.newItem.yini = item.yini;
         this.newItem.yfin = item.yfin;
-        this.form = new FormData;
-        this.attachment = item.attachment;
-        this.click_add();        
+        // this.class_b1();
       },
       clear_data(){
         this.view = false,
@@ -159,26 +211,22 @@
       },
       async click_save (){
         if(this.consistencia() == 0){
-// console.log('click_save 0: ', this.newItem.documento);
-          await this.uploadFile();
-// console.log('click_save 1: ', this.newItem.documento);
+          if(this.add){
+            await this.uploadFile();
+          }
           this.save_data();
           return true;
         }
         return false;
       },
       async click_add () {
-        if(!this.add){
-          this.add = !this.add;
-          this.class_add = 'glyphicon glyphicon-ok';
+        if(!this.add && !this.edit){
+          this.add = true;
           this.$emit('changeAdd', this.tipo);
         }else{
           var response = await this.click_save();
           if(response){
-            alert('Registro grabado.');          
-            this.add = !this.add;
-            this.edit = false;
-            this.class_add = 'glyphicon glyphicon-plus';
+            toastr.success('Registro grabado.');
           }
         }
       },
@@ -191,9 +239,16 @@
         }
       },
       fieldChange(e){
+// console.log('e.target: ', e.target);
 // console.log('e.target.files: ', e.target.files);
         let selectedFiles = e.target.files;
         if(!selectedFiles.length){
+          this.attachment = '';
+          this.newItem.name_file = '';
+          return false;
+        }
+        if(selectedFiles[0].type != 'application/pdf'){
+          toastr.error('Sólo se permiten archivos PDF.');
           this.attachment = '';
           this.newItem.name_file = '';
           return false;
@@ -206,7 +261,7 @@
         this.form.append('tipo',this.tipo);
         const config = { headers: { 'Content-Type': 'multipart/form-data' } };
         document.getElementById('upload-file').value=[];
-        await axios.post('/api/'+this.tipo+'/upload',this.form,config).then(response=>{
+        await axios.post('/api/cv/'+this.tipo+'/upload',this.form,config).then(response=>{
           let str = response.data.path;
           let n = str.indexOf(this.tipo+'/') + this.tipo.length;
           this.newItem.documento = str.substring(n+1);
@@ -216,20 +271,19 @@
         });
       },
       remove: function (item) {
-        alert("EN CONSTRUCCION Eliminar item: "+item.id);
         let request = {
                     'data': item,
                   };
-        var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/destroy';     
+        var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/destroy';
         axios.post(url, request).then(response=>{
-console.log('remove: ', response.data);
+          toastr.success('Registro eliminado: '+item.titulo);
+// console.log('remove: ', response.data);
           this.getData();
         }).catch(response=>{
           console.log(this.tipo+' remove Error');
         });
       },
       cancel: function () {
-        // alert("EN CONSTRUCCION Cancelar Agregar");
         this.add = !this.add;
         this.edit = false;
         this.class_add = 'glyphicon glyphicon-plus';
@@ -260,9 +314,9 @@ console.log('remove: ', response.data);
         var url = this.protocol+'//'+this.URLdomain+'/api/cv/academico/save';
         await axios.post(url, request).then(response=>{
           // console.log(this.tipo+' save_data response.data: ',response.data);
-          this.getData();
           this.$emit('clearView');
           this.clear_data();
+          this.getData();
         }).catch(function (error) {
             console.log(this.tipo+' save_data: ',error);
         });
@@ -280,17 +334,17 @@ console.log('remove: ', response.data);
         if(!this.newItem.nivel_id){
           consistencia.push("Debe seleccionar el Grado conseguido en el campo Nivel.");
         }
-        if(!this.newItem.name_file){
+        if(!this.newItem.name_file && this.add){
           consistencia.push("Debe subir el Documento que certifique el grado conseguido en formato PDF.");
         }
         if(!this.newItem.yini){
           consistencia.push("Debe ingresar el año de inicio de sus estudios.");
         }
-        if(!this.newItem.yfin){
+        if(this.newItem.yfin.length == 0){
           consistencia.push("Debe ingresar el año de fin de sus estudios o cero si se encuentra en curso.");
         }
-        for (var i = 0; i<consistencia.length; i++) {
-          alert(consistencia[i]);
+        for (var i = consistencia.length - 1; i >= 0; i--) {
+          toastr.error(consistencia[i]);
         }
         return consistencia.length;
       },

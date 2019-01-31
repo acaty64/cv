@@ -29,14 +29,15 @@ class AcademicoController extends Controller
 // return $request;
         if($request->id == 'new'){
             $item = new Academico;
+            $item->user_id = $request->user_id;
+            $item->name_file = $request->name_file;
+            $item->documento = $request->documento;
         }else{
             $item = Academico::findOrFail($request->id);
         }
-        $item->user_id = $request->user_id;
+
         $item->titulo = $request->titulo;
         $item->nivel_id = $request->nivel_id;
-        $item->name_file = $request->name_file;
-        $item->documento = $request->documento;
         $item->yini = $request->yini;
         $item->yfin = $request->yfin;
 
@@ -52,7 +53,16 @@ class AcademicoController extends Controller
         $item = $request->all();
         $id = $item['data']['id'];
         $academico = Academico::findOrFail($id);
-        $academico->delete();
+        try {
+            /* Elimina el archivo documento */
+            $file = $academico->documento;
+            $archivo = public_path('storage/academico/'.$file);
+            unlink($archivo);
+            /* Elimina el registro del archivo */
+            $academico->delete();            
+        } catch (Exception $e) {
+            return ['success'=>false];
+        }
         return ['success'=>true];
     }
 
